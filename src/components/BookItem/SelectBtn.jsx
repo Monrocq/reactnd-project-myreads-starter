@@ -9,7 +9,8 @@ export function SelectBtn(props) {
     if (newShelf !== props.shelf) {
       update({id: props.id}, newShelf.target.value).then(res => {
         console.log(res);
-        location.pathname === "/" ? window.location.reload() : navigate("/")
+        location.pathname !== "/" && navigate("/");
+        window.location.reload();
       });
     }
   }

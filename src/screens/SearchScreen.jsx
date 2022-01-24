@@ -3,27 +3,31 @@ import {Link} from 'react-router-dom';
 import * as BooksAPI from '../utils/BooksAPI';
 import terms from '../SEARCH_TERMS';
 import BookItem from '../components/BookItem';
+import {DebounceInput} from 'react-debounce-input';
 
 export class SearchScreen extends Component {
   state = {
-    books: [],
-    field: ''
+    books: []
   }
   search = field => {
-    this.setState({
-      field
-    });
     if (field.length === 0) {
       this.setState({
         books: []
       })
     } else if (!!terms.find(term => term.toLowerCase() === field.toLowerCase())) {
-      BooksAPI.search(field).then(books => this.setState({
-        books
-      }));
+      BooksAPI.search(field).then(booksFetched => {
+        let books = booksFetched.map(book => {
+          const bookShelf = this.props.booksFromMain.find((b) => b.id === book.id);
+          return { ...book, shelf: bookShelf ? bookShelf.shelf : 'none' };
+        });
+        this.setState({
+          books
+        })
+      });
     }
   }
   render() {
+    
     return (
       <div className="search-books">
         <div className="search-books-bar">
@@ -33,11 +37,11 @@ export class SearchScreen extends Component {
             </button>
           </Link>
           <div className="search-books-input-wrapper">
-            <input 
+            <DebounceInput 
               type="text" 
               placeholder="Search by title or author"
               onChange={e => this.search(e.target.value)}
-              value={this.state.field}
+              debounceTimeout={500}
             />
           </div>
         </div>

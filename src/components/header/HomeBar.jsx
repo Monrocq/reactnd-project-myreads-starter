@@ -1,9 +1,9 @@
 import React from 'react'
 
-function HomeBar() {
+function HomeBar({title}) {
   return (
     <div className="list-books-title">
-      <h1>MyReads</h1>
+      <h1>{title}</h1>
     </div>
   )
 }

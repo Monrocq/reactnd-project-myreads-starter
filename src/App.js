@@ -1,27 +1,57 @@
 import React from 'react'
-// import * as BooksAPI from './BooksAPI'
+import * as BooksAPI from './utils/BooksAPI'
 import './App.css'
 import HomeScreen from './screens/HomeScreen'
 import SearchScreen from './screens/SearchScreen'
 import {Routes, Route} from 'react-router-dom'
+import NoMatchPage from './screens/NoMatchPage'
 
 class BooksApp extends React.Component {
+  //state defined on "undefined" to allow displaying "Loading Books..." on UI
   state = {
-    /**
-     * TODO: Instead of using this state variable to keep track of which page
-     * we're on, use the URL in the browser's address bar. This will ensure that
-     * users can use the browser's back and forward buttons to navigate between
-     * pages, as well as provide a good URL they can bookmark and share.
-     */
-    showSearchPage: false
+    CURRENTLY_READING: undefined,
+    WANT_TO_READ: undefined,
+    READ: undefined,
   }
-
+  componentDidMount() {
+    BooksAPI.getAll().then(books => {
+      let CURRENTLY_READING = [];
+      let WANT_TO_READ = [];
+      let READ = [];
+      books.forEach(book => {
+        switch(book.shelf) {
+          case "currentlyReading": {
+            CURRENTLY_READING.push(book);
+            break;
+          }
+          case "wantToRead": {
+            WANT_TO_READ.push(book);
+            break;
+          }
+          case "read": {
+            READ.push(book);
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      });
+      this.setState({
+        CURRENTLY_READING,
+        WANT_TO_READ,
+        READ
+      })
+    });
+  }
   render() {
+    let {CURRENTLY_READING, WANT_TO_READ, READ} = this.state;
     return (
       <div className="app">
         <Routes>
-          <Route exact path='/' element={<HomeScreen/>}/>
-          <Route path='/search' element={<SearchScreen/>}/>
+          <Route exact path='/' element={<HomeScreen books={this.state} />}/>
+          <Route path='/search' element={<SearchScreen booksFromMain={[...CURRENTLY_READING || [], ...WANT_TO_READ || [], ...READ || []]} />}/>
+          <Route path='*' element={<NoMatchPage />}/>
         </Routes>
       </div>
     )
